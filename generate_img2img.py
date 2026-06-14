@@ -98,7 +98,7 @@ def is_invalid_image(image, black_threshold: float, std_threshold: float) -> boo
 
 
 def list_source_images(source_dir: Path) -> List[Path]:
-    exts = {".png", ".jpg", ".jpeg", ".bmp", ".webp"}
+    exts = {".ppm", ".png", ".jpg", ".jpeg"}
     files = sorted([p for p in source_dir.iterdir() if p.suffix.lower() in exts])
     if not files:
         raise ValueError(f"No source images found in {source_dir}")

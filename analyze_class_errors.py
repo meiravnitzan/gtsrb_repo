@@ -5,7 +5,7 @@ import pandas as pd
 from PIL import Image
 import matplotlib.pyplot as plt
 
-IMG_EXTS = (".jpg", ".jpeg", ".png", ".bmp", ".webp")
+IMG_EXTS = (".jpg", ".jpeg", ".png", ".bmp", ".webp", ".ppm")
 
 
 def list_images(folder):
@@ -26,6 +26,22 @@ def safe_title(path, max_len=28):
     return base if len(base) <= max_len else base[: max_len - 3] + "..."
 
 
+def resolve_class_dir(data_dir, pred_idx, pred_class=None):
+    candidates = []
+
+    if pred_class is not None:
+        candidates.append(os.path.join(data_dir, str(pred_class)))
+
+    candidates.append(os.path.join(data_dir, str(pred_idx)))
+    candidates.append(os.path.join(data_dir, f"{int(pred_idx):05d}"))
+
+    for candidate in candidates:
+        if os.path.isdir(candidate):
+            return candidate
+
+    return None
+
+
 def main(args):
     os.makedirs(args.output_dir, exist_ok=True)
 
@@ -35,7 +51,6 @@ def main(args):
     if missing:
         raise ValueError(f"CSV is missing required columns: {sorted(missing)}")
 
-    # Select misclassified samples for the requested true class
     target_errors = df[
         (df["true_label"] == args.class_idx) & (df["pred_label"] != args.class_idx)
     ].copy()
@@ -44,7 +59,6 @@ def main(args):
         print(f"No misclassified samples found for class {args.class_idx}.")
         return
 
-    # If no human-readable class names, fall back to stringified labels
     if "pred_class" not in target_errors.columns:
         target_errors["pred_class"] = target_errors["pred_label"].astype(str)
 
@@ -53,23 +67,17 @@ def main(args):
     for (pred_idx, pred_class), group in grouped:
         misclassified_paths = group["image_path"].tolist()
 
-        # Try folder by class name first, then by numeric label
-        pred_class_dir = os.path.join(args.data_dir, str(pred_class))
-        if not os.path.isdir(pred_class_dir):
-            alt_dir = os.path.join(args.data_dir, str(pred_idx))
-            if os.path.isdir(alt_dir):
-                pred_class_dir = alt_dir
-            else:
-                print(
-                    f"Skipping predicted class '{pred_class}' (label {pred_idx}) "
-                    f"because folder was not found: {pred_class_dir}"
-                )
-                continue
+        pred_class_dir = resolve_class_dir(args.data_dir, pred_idx, pred_class)
+        if pred_class_dir is None:
+            print(
+                f"Skipping predicted class '{pred_class}' (label {pred_idx}) "
+                f"because no matching folder was found under: {args.data_dir}"
+            )
+            continue
 
         misclassified_abs = {os.path.abspath(x) for x in misclassified_paths}
         candidate_paths = [
-            p
-            for p in list_images(pred_class_dir)
+            p for p in list_images(pred_class_dir)
             if os.path.abspath(p) not in misclassified_abs
         ]
 
@@ -138,7 +146,7 @@ if __name__ == "__main__":
         "--data-dir",
         type=str,
         required=True,
-        help="Evaluation dataset root organized by class folders",
+        help="Dataset root organized by class folders, e.g. .../Final_Test/Images or .../Final_Training/Images",
     )
     parser.add_argument(
         "--class-idx",

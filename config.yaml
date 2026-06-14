@@ -1,0 +1,82 @@
+project_name: gtsrb_augmentation_project
+seed: 42
+num_classes: 43
+image_size: 128
+batch_size: 128
+num_workers: 2
+epochs: 8
+learning_rate: 0.0005
+weight_decay: 0.0001
+model_name: resnet18
+label_smoothing: 0.05
+
+train_zip: /content/AISV.X401/gtsrb_repo/data/GTSRB_Final_Training_Images.zip
+test_zip: /content/AISV.X401/gtsrb_repo/data/GTSRB_Final_Test_Images.zip
+test_gt_zip: /content/AISV.X401/gtsrb_repo/data/GTSRB_Final_Test_GT.zip
+
+# Main workspace paths used directly by the scripts
+workspace_root: /content/AISV.X401/gtsrb_repo
+results_dir: /content/AISV.X401/gtsrb_repo/results
+models_dir: /content/AISV.X401/gtsrb_repo/models
+data_dir: /content/AISV.X401/gtsrb_repo/data
+
+# Extra paths for the full baseline -> synthetic class 22 -> gen22 flow
+logs_dir: /content/AISV.X401/gtsrb_repo/logs
+predictions_dir: /content/AISV.X401/gtsrb_repo/results/predictions
+reports_dir: /content/AISV.X401/gtsrb_repo/results/reports
+plots_dir: /content/AISV.X401/gtsrb_repo/results/plots
+
+# Official extracted layout paths after archive preparation
+train_root: /content/AISV.X401/gtsrb_repo/data/GTSRB/Final_Training/Images
+test_root: /content/AISV.X401/gtsrb_repo/data/GTSRB/Final_Test/Images
+test_csv: /content/AISV.X401/gtsrb_repo/data/GT-final_test.csv
+
+# Train/val split and augmentation metadata
+val_ratio: 0.15
+class22_id: 22
+class22_name: bumpy_road
+augmented_manifest: /content/AISV.X401/gtsrb_repo/data/generated/class22_manifest.csv
+
+# Synthetic generation paths/options for class 22
+generated_root: /content/AISV.X401/gtsrb_repo/data/generated
+generated_class22_dir: /content/AISV.X401/gtsrb_repo/data/generated/class22
+generation_script: /content/AISV.X401/gtsrb_repo/generate_class22.py
+generation_num_images: 80
+generation_model_id: runwayml/stable-diffusion-v1-5
+generation_guidance_scale: 8.0
+generation_steps: 30
+generation_batch_size: 4
+generation_seed: 42
+generation_height: 512
+generation_width: 512
+
+# Saved checkpoints
+baseline_checkpoint: /content/AISV.X401/gtsrb_repo/models/best_baseline.pt
+gen22_checkpoint: /content/AISV.X401/gtsrb_repo/models/best_augmented.pt
+
+# Saved training histories
+baseline_history_json: /content/AISV.X401/gtsrb_repo/results/history_baseline.json
+gen22_history_json: /content/AISV.X401/gtsrb_repo/results/history_augmented.json
+
+# Saved evaluation outputs
+baseline_metrics_json: /content/AISV.X401/gtsrb_repo/results/metrics_baseline.json
+gen22_metrics_json: /content/AISV.X401/gtsrb_repo/results/metrics_gen22.json
+baseline_confusion_png: /content/AISV.X401/gtsrb_repo/results/confusion_matrix_baseline.png
+gen22_confusion_png: /content/AISV.X401/gtsrb_repo/results/confusion_matrix_gen22.png
+baseline_predictions_csv: /content/AISV.X401/gtsrb_repo/results/predictions/predictions_baseline.csv
+gen22_predictions_csv: /content/AISV.X401/gtsrb_repo/results/predictions/predictions_gen22.csv
+
+# Optional class 22 analysis outputs
+baseline_class22_report_dir: /content/AISV.X401/gtsrb_repo/results/reports/class22_baseline
+gen22_class22_report_dir: /content/AISV.X401/gtsrb_repo/results/reports/class22_gen22
+
+# Helpful command references
+baseline_train_command: "python train.py --config config.yaml --mode baseline"
+baseline_evaluate_command: "python evaluate.py --config config.yaml --checkpoint /content/AISV.X401/gtsrb_repo/models/best_baseline.pt --tag baseline"
+baseline_analyze_class22_command: "python analyze_class22_errors.py --config config.yaml --predictions_csv /content/AISV.X401/gtsrb_repo/results/predictions/predictions_baseline.csv --tag baseline --target_class 22"
+generate_class22_command: "python generate_class22.py --output_dir /content/AISV.X401/gtsrb_repo/data/generated/class22 --num_images 80 --model_id runwayml/stable-diffusion-v1-5 --guidance_scale 8.0 --steps 30 --batch_size 4 --seed 42 --height 512 --width 512"
+gen22_train_command: "python train.py --config config.yaml --mode augmented"
+gen22_evaluate_command: "python evaluate.py --config config.yaml --checkpoint /content/AISV.X401/gtsrb_repo/models/best_augmented.pt --tag gen22"
+gen22_analyze_class22_command: "python analyze_class22_errors.py --config config.yaml --predictions_csv /content/AISV.X401/gtsrb_repo/results/predictions/predictions_gen22.csv --tag gen22 --target_class 22"
+
+device: cuda

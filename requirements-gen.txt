@@ -1,0 +1,17 @@
+# Core runtime (same as requirements.txt)
+torch
+torchvision
+numpy
+pandas
+scikit-learn
+pyyaml
+matplotlib
+Pillow
+tqdm
+
+# Optional: synthetic data generation for class 22
+diffusers
+transformers
+huggingface_hub
+accelerate
+safetensors

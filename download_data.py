@@ -9,21 +9,20 @@ EXTRACT = ROOT / 'data'
 RAW.mkdir(parents=True, exist_ok=True)
 EXTRACT.mkdir(parents=True, exist_ok=True)
 
-FILES = {
-    'train_zip': {
-        'url': 'https://benchmark.ini.rub.de/Dataset/GTSRB_Final_Training_Images.zip',
-        'path': RAW / 'GTSRB_Final_Training_Images.zip'
+FILES = [
+    {
+        "url": "https://sid.erda.dk/public/archives/daaeac0d7ce1152aea9b61d9f1e19370/GTSRB_Final_Training_Images.zip",
+        "path": "data/GTSRB_Final_Training_Images.zip",
     },
-    'test_zip': {
-        'url': 'https://benchmark.ini.rub.de/Dataset/GTSRB_Final_Test_Images.zip',
-        'path': RAW / 'GTSRB_Final_Test_Images.zip'
+    {
+        "url": "https://sid.erda.dk/public/archives/daaeac0d7ce1152aea9b61d9f1e19370/GTSRB_Final_Test_Images.zip",
+        "path": "data/GTSRB_Final_Test_Images.zip",
     },
-    'test_gt_zip': {
-        'url': 'https://benchmark.ini.rub.de/Dataset/GTSRB_Final_Test_GT.zip',
-        'path': RAW / 'GTSRB_Final_Test_GT.zip'
-    }
-}
-
+    {
+        "url": "https://sid.erda.dk/public/archives/daaeac0d7ce1152aea9b61d9f1e19370/GTSRB_Final_Test_GT.zip",
+        "path": "data/GTSRB_Final_Test_GT.zip",
+    },
+]
 
 def download(url: str, dest: Path):
     if dest.exists():

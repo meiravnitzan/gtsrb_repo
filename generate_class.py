@@ -1,4 +1,3 @@
-
 from __future__ import annotations
 
 import argparse
@@ -6,6 +5,7 @@ import csv
 import json
 from pathlib import Path
 
+import numpy as np
 import torch
 from diffusers import StableDiffusionPipeline, DPMSolverMultistepScheduler
 
@@ -20,24 +20,9 @@ def parse_args() -> argparse.Namespace:
     parser = argparse.ArgumentParser(
         description="Generate synthetic GTSRB images from a JSON generation plan."
     )
-    parser.add_argument(
-        "--plan_json",
-        type=str,
-        required=True,
-        help="Path to a JSON file describing target classes, prompts, and counts.",
-    )
-    parser.add_argument(
-        "--output_root",
-        type=str,
-        required=True,
-        help="Root directory where class subfolders will be created.",
-    )
-    parser.add_argument(
-        "--manifest_csv",
-        type=str,
-        required=True,
-        help="Combined CSV manifest for all generated images.",
-    )
+    parser.add_argument("--plan_json", type=str, required=True)
+    parser.add_argument("--output_root", type=str, required=True)
+    parser.add_argument("--manifest_csv", type=str, required=True)
     parser.add_argument(
         "--model_id",
         type=str,
@@ -49,6 +34,18 @@ def parse_args() -> argparse.Namespace:
     parser.add_argument("--seed", type=int, default=42)
     parser.add_argument("--height", type=int, default=512)
     parser.add_argument("--width", type=int, default=512)
+    parser.add_argument(
+        "--black_threshold",
+        type=float,
+        default=3.0,
+        help="Reject image if mean pixel value is below this threshold (0-255 scale).",
+    )
+    parser.add_argument(
+        "--std_threshold",
+        type=float,
+        default=3.0,
+        help="Reject image if pixel stddev is below this threshold.",
+    )
     return parser.parse_args()
 
 
@@ -81,9 +78,15 @@ def load_plan(plan_json: str):
     return plan
 
 
+def is_invalid_image(image, black_threshold: float, std_threshold: float) -> bool:
+    arr = np.asarray(image).astype(np.float32)
+    mean_val = float(arr.mean())
+    std_val = float(arr.std())
+    return mean_val < black_threshold or std_val < std_threshold
+
+
 def main() -> None:
     args = parse_args()
-
     plan = load_plan(args.plan_json)
 
     output_root = Path(args.output_root)
@@ -100,25 +103,27 @@ def main() -> None:
     for item in plan:
         class_id = int(item["class_id"])
         class_name = str(item["class_name"])
-        num_images = int(item["num_images"])
+        target_num_images = int(item["num_images"])
         prompts = list(item["prompts"])
 
         class_dir = output_root / f"{class_id:05d}"
         class_dir.mkdir(parents=True, exist_ok=True)
 
         saved = 0
+        attempted = 0
+
         print(f"\nGenerating class {class_id} ({class_name}) into {class_dir}")
 
-        while saved < num_images:
-            current_batch = min(args.batch_size, num_images - saved)
+        while saved < target_num_images:
+            current_batch = min(args.batch_size, target_num_images - saved)
             batch_prompts = [
-                prompts[(saved + i) % len(prompts)]
+                prompts[(attempted + i) % len(prompts)]
                 for i in range(current_batch)
             ]
 
             generators = [
                 torch.Generator(device=device).manual_seed(
-                    args.seed + class_id * 10000 + saved + i
+                    args.seed + class_id * 10000 + attempted + i
                 )
                 for i in range(current_batch)
             ]
@@ -134,8 +139,21 @@ def main() -> None:
             )
 
             for i, image in enumerate(result.images):
-                idx = saved + i
-                out_name = f"{class_id:05d}_synth_{idx:03d}.png"
+                prompt_used = batch_prompts[i]
+                seed_used = args.seed + class_id * 10000 + attempted + i
+
+                if is_invalid_image(
+                    image,
+                    black_threshold=args.black_threshold,
+                    std_threshold=args.std_threshold,
+                ):
+                    print(
+                        f"  skipped invalid image for class {class_id} "
+                        f"(seed={seed_used}, prompt='{prompt_used[:60]}...')"
+                    )
+                    continue
+
+                out_name = f"{class_id:05d}_synth_{saved:03d}.png"
                 out_path = class_dir / out_name
                 image.save(out_path)
 
@@ -144,17 +162,22 @@ def main() -> None:
                         "image_path": str(out_path),
                         "label": class_id,
                         "class_name": class_name,
-                        "prompt": batch_prompts[i],
+                        "prompt": prompt_used,
                         "negative_prompt": NEGATIVE_PROMPT,
-                        "seed": args.seed + class_id * 10000 + idx,
+                        "seed": seed_used,
                         "width": args.width,
                         "height": args.height,
                         "model_id": args.model_id,
                     }
                 )
 
-            saved += current_batch
-            print(f"  saved {saved}/{num_images}")
+                saved += 1
+                print(f"  saved {saved}/{target_num_images}")
+
+                if saved >= target_num_images:
+                    break
+
+            attempted += current_batch
 
     with manifest_path.open("w", newline="", encoding="utf-8") as f:
         writer = csv.DictWriter(

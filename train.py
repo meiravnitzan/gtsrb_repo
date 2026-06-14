@@ -3,6 +3,7 @@ from __future__ import annotations
 import argparse
 import csv
 import json
+import os
 import random
 from pathlib import Path
 
@@ -24,10 +25,28 @@ from model import build_model
 
 
 def set_seed(seed: int) -> None:
+    os.environ["PYTHONHASHSEED"] = str(seed)
+    os.environ["CUBLAS_WORKSPACE_CONFIG"] = ":16:8"
+
     random.seed(seed)
     np.random.seed(seed)
     torch.manual_seed(seed)
+    torch.cuda.manual_seed(seed)
     torch.cuda.manual_seed_all(seed)
+
+    torch.backends.cudnn.deterministic = True
+    torch.backends.cudnn.benchmark = False
+
+    try:
+        torch.use_deterministic_algorithms(True)
+    except Exception:
+        pass
+
+
+def seed_worker(worker_id: int) -> None:
+    worker_seed = torch.initial_seed() % 2**32
+    np.random.seed(worker_seed)
+    random.seed(worker_seed)
 
 
 def read_manifest_samples(manifest_csv: str):
@@ -163,17 +182,25 @@ def main():
         ),
     ])
 
+    g = torch.Generator()
+    g.manual_seed(cfg["seed"])
+
     train_loader = DataLoader(
         GTSRBDataset(train_samples, transform=train_tfms),
         batch_size=cfg["batch_size"],
         shuffle=True,
         num_workers=cfg["num_workers"],
+        worker_init_fn=seed_worker,
+        generator=g,
     )
+
     val_loader = DataLoader(
         GTSRBDataset(val_samples, transform=eval_tfms),
         batch_size=cfg["batch_size"],
         shuffle=False,
         num_workers=cfg["num_workers"],
+        worker_init_fn=seed_worker,
+        generator=g,
     )
 
     device = torch.device(cfg["device"] if torch.cuda.is_available() else "cpu")
@@ -182,6 +209,7 @@ def main():
     criterion = nn.CrossEntropyLoss(
         label_smoothing=cfg.get("label_smoothing", 0.0)
     )
+
     optimizer = torch.optim.AdamW(
         model.parameters(),
         lr=cfg["learning_rate"],

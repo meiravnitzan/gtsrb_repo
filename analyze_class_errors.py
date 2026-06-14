@@ -62,7 +62,7 @@ def main(args):
     if "pred_class" not in target_errors.columns:
         target_errors["pred_class"] = target_errors["pred_label"].astype(str)
 
-    print(f"Found {len(class_errors)} misclassified samples for class {args.class_idx}.")
+    print(f"Found {len(target_errors)} misclassified samples for class {args.class_idx}.")
     grouped = target_errors.groupby(["pred_label", "pred_class"])
 
     for (pred_idx, pred_class), group in grouped:

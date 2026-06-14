@@ -1,61 +1,55 @@
 from pathlib import Path
 from urllib.request import urlretrieve
 import zipfile
-import os
 
-ROOT = Path('/content/gtsrb_project')
-RAW = ROOT / 'data' / 'raw'
-EXTRACT = ROOT / 'data'
-RAW.mkdir(parents=True, exist_ok=True)
-EXTRACT.mkdir(parents=True, exist_ok=True)
+DATA_DIR = Path("data")
 
 FILES = [
     {
         "url": "https://sid.erda.dk/public/archives/daaeac0d7ce1152aea9b61d9f1e19370/GTSRB_Final_Training_Images.zip",
-        "path": "data/GTSRB_Final_Training_Images.zip",
+        "path": DATA_DIR / "GTSRB_Final_Training_Images.zip",
     },
     {
         "url": "https://sid.erda.dk/public/archives/daaeac0d7ce1152aea9b61d9f1e19370/GTSRB_Final_Test_Images.zip",
-        "path": "data/GTSRB_Final_Test_Images.zip",
+        "path": DATA_DIR / "GTSRB_Final_Test_Images.zip",
     },
     {
         "url": "https://sid.erda.dk/public/archives/daaeac0d7ce1152aea9b61d9f1e19370/GTSRB_Final_Test_GT.zip",
-        "path": "data/GTSRB_Final_Test_GT.zip",
+        "path": DATA_DIR / "GTSRB_Final_Test_GT.zip",
     },
 ]
 
-def download(url: str, dest: Path):
+
+def download(url: str, dest: Path) -> None:
+    dest.parent.mkdir(parents=True, exist_ok=True)
     if dest.exists():
-        print(f'Skipping download, exists: {dest}')
+        print(f"[skip] already downloaded: {dest}")
         return
-    print(f'Downloading {url} -> {dest}')
+    print(f"[download] {url} -> {dest}")
     urlretrieve(url, dest)
 
 
-def unzip(src: Path, dest: Path):
-    print(f'Extracting {src} -> {dest}')
-    with zipfile.ZipFile(src, 'r') as zf:
-        zf.extractall(dest)
+def extract(zip_path: Path, out_dir: Path) -> None:
+    print(f"[extract] {zip_path} -> {out_dir}")
+    with zipfile.ZipFile(zip_path, "r") as zf:
+        zf.extractall(out_dir)
 
 
-def main():
-    for item in FILES.values():
-        download(item['url'], item['path'])
+def main() -> None:
+    DATA_DIR.mkdir(parents=True, exist_ok=True)
 
-    unzip(FILES['train_zip']['path'], EXTRACT)
-    unzip(FILES['test_zip']['path'], EXTRACT)
-    unzip(FILES['test_gt_zip']['path'], EXTRACT)
+    for item in FILES:
+        download(item["url"], item["path"])
 
-    print('\nDone. Files available at:')
-    for key, item in FILES.items():
-        print(f'- {key}: {item["path"]}')
+    extract(DATA_DIR / "GTSRB_Final_Training_Images.zip", DATA_DIR)
+    extract(DATA_DIR / "GTSRB_Final_Test_Images.zip", DATA_DIR)
+    extract(DATA_DIR / "GTSRB_Final_Test_GT.zip", DATA_DIR)
 
-    print('\nSuggested config.yaml paths:')
-    print(f'train_zip: {FILES["train_zip"]["path"]}')
-    print(f'test_zip: {FILES["test_zip"]["path"]}')
-    print(f'test_gt_zip: {FILES["test_gt_zip"]["path"]}')
-    print(f'data_dir: {EXTRACT}')
+    print("\nDone.")
+    print(f"Training images: {DATA_DIR / 'GTSRB' / 'Final_Training' / 'Images'}")
+    print(f"Test images:     {DATA_DIR / 'GTSRB' / 'Final_Test' / 'Images'}")
+    print(f"Test CSV:        {DATA_DIR / 'GT-final_test.csv'}")
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     main()

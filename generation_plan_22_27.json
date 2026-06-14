@@ -1,1 +1,29 @@
 
+[
+  {
+    "class_id": 22,
+    "class_name": "bumpy_road",
+    "num_images": 80,
+    "source_dir": "/content/gtsrbrepo/data/GTSRB/Final_Training/Images/00022",
+    "strength": 0.40,
+    "prompts": [
+      "a centered German bumpy road traffic sign, red triangle border, white background, uneven road bump icon, clean dataset style, front facing, high contrast",
+      "a German warning bumpy road sign, triangular red border, black uneven road symbol, isolated sign, front view, realistic but clean training image",
+      "close-up of a German bumpy road traffic sign, centered, no background clutter, traffic sign dataset style, sharp edges, front facing",
+      "a single bumpy road warning sign on plain background, red triangular border, black rough road symbol, centered composition"
+    ]
+  },
+  {
+    "class_id": 27,
+    "class_name": "pedestrians",
+    "num_images": 80,
+    "source_dir": "/content/gtsrbrepo/data/GTSRB/Final_Training/Images/00027",
+    "strength": 0.35,
+    "prompts": [
+      "a centered German pedestrians traffic sign, red triangle border, white background, black pedestrian crossing symbol, clean dataset style, front facing, high contrast",
+      "a German warning pedestrians sign, triangular red border, walking people symbol, isolated sign, front view, realistic but clean training image",
+      "close-up of a German pedestrians traffic sign, centered, no background clutter, traffic sign dataset style, sharp edges, front facing",
+      "a single pedestrians warning sign on plain background, red triangular border, pedestrian symbol, centered composition"
+    ]
+  }
+]

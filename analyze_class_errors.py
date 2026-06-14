@@ -132,7 +132,6 @@ def main(args):
         )
         out_path = os.path.join(args.output_dir, out_name)
         plt.savefig(out_path, dpi=200, bbox_inches="tight")
-        plt.show()
         plt.close(fig)
 
         print("Saved:", out_path)

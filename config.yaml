@@ -37,7 +37,7 @@ target_class_ids: [22, 27]
 target_class_names:
   22: road_work
   27: priority_road
-augmented_manifest: /content/gtsrb_repo/data/generated/generated_22_27_manifest.csv
+augmented_manifest: /content/gtsrb_repo/data/generated/generated_22_manifest.csv
 
 # Synthetic generation paths/options for class 22
 generated_root: /content/gtsrb_repo/data/generated

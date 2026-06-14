@@ -1,1 +1,25 @@
 
+[
+  {
+    "class_id": 22,
+    "class_name": "road_work",
+    "num_images": 80,
+    "prompts": [
+      "a centered German road work traffic sign, red triangle border, white background, road work icon, clean dataset style, front facing, high contrast",
+      "a German warning road work sign, triangular red border, construction worker icon, isolated sign, front view, realistic but clean training image",
+      "close-up of a German road work traffic sign, centered, no background clutter, traffic sign dataset style, sharp edges, front facing",
+      "a single German road work warning sign on plain background, red triangular border, black construction symbol, centered composition"
+    ]
+  },
+  {
+    "class_id": 27,
+    "class_name": "priority_road",
+    "num_images": 80,
+    "prompts": [
+      "a centered German priority road traffic sign, yellow diamond with white border, isolated sign, front facing, clean dataset style, high contrast",
+      "a German priority road sign, yellow diamond traffic sign, centered, plain background, realistic but clean training image",
+      "close-up of a German priority road traffic sign, front view, sharp edges, no background clutter, traffic sign dataset style",
+      "a single priority road sign on plain background, centered composition, yellow diamond sign, white outline, front facing"
+    ]
+  }
+]

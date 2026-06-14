@@ -20,7 +20,7 @@ results_dir: /content/gtsrb_repo/results
 models_dir: /content/gtsrb_repo/models
 data_dir: /content/gtsrb_repo/data
 
-# Extra paths for the full baseline -> synthetic classes 22+27 -> augmented flow
+# Extra paths for the full baseline -> synthetic classes 22 -> augmented flow
 logs_dir: /content/gtsrb_repo/logs
 predictions_dir: /content/gtsrb_repo/results/predictions
 reports_dir: /content/gtsrb_repo/results/reports
@@ -39,11 +39,10 @@ target_class_names:
   27: priority_road
 augmented_manifest: /content/gtsrb_repo/data/generated/generated_22_27_manifest.csv
 
-# Synthetic generation paths/options for classes 22 and 27
+# Synthetic generation paths/options for class 22
 generated_root: /content/gtsrb_repo/data/generated
 generated_class22_dir: /content/gtsrb_repo/data/generated/00022
-generated_class27_dir: /content/gtsrb_repo/data/generated/00027
-generation_script: /content/gtsrb_repo/generate_class.py
+generation_script: /content/gtsrb_repo/generate_img2img.py
 generation_plan_json: /content/gtsrb_repo/generation_plan.json
 generation_num_images_per_class: 80
 generation_model_id: stable-diffusion-v1-5/stable-diffusion-v1-5
@@ -56,39 +55,22 @@ generation_width: 512
 
 # Saved checkpoints
 baseline_checkpoint: /content/gtsrb_repo/models/best_baseline.pt
-gen22_27_checkpoint: /content/gtsrb_repo/models/best_augmented.pt
+gen22_checkpoint: /content/gtsrb_repo/models/best_augmented.pt
 
 # Saved training histories
 baseline_history_json: /content/gtsrb_repo/results/history_baseline.json
-gen22_27_history_json: /content/gtsrb_repo/results/history_augmented.json
+gen22_history_json: /content/gtsrb_repo/results/history_augmented.json
 
 # Saved evaluation outputs
 baseline_metrics_json: /content/gtsrb_repo/results/metrics_baseline.json
-gen22_27_metrics_json: /content/gtsrb_repo/results/metrics_gen22_27.json
+gen22_metrics_json: /content/gtsrb_repo/results/metrics_gen22.json
 baseline_confusion_png: /content/gtsrb_repo/results/confusion_matrix_baseline.png
-gen22_27_confusion_png: /content/gtsrb_repo/results/confusion_matrix_gen22_27.png
+gen22_confusion_png: /content/gtsrb_repo/results/confusion_matrix_gen22.png
 baseline_predictions_csv: /content/gtsrb_repo/results/predictions/predictions_baseline.csv
-gen22_27_predictions_csv: /content/gtsrb_repo/results/predictions/predictions_gen22_27.csv
+gen22_predictions_csv: /content/gtsrb_repo/results/predictions/predictions_gen22.csv
 
 # Optional analysis outputs
 baseline_class22_report_dir: /content/gtsrb_repo/results/reports/class22_baseline
-baseline_class27_report_dir: /content/gtsrb_repo/results/reports/class27_baseline
-gen22_27_class22_report_dir: /content/gtsrb_repo/results/reports/class22_gen22_27
-gen22_27_class27_report_dir: /content/gtsrb_repo/results/reports/class27_gen22_27
-
-# Helpful command references
-baseline_train_command: "python train.py --config config.yaml --mode baseline"
-baseline_evaluate_command: "python evaluate.py --config config.yaml --checkpoint /content/gtsrb_repo/models/best_baseline.pt --tag baseline"
-
-generate_classes_22_27_command: "python generate_class.py --plan_json /content/gtsrb_repo/generation_plan.json --output_root /content/gtsrb_repo/data/generated --manifest_csv /content/gtsrb_repo/data/generated/generated_22_27_manifest.csv --model_id stable-diffusion-v1-5/stable-diffusion-v1-5 --guidance_scale 8.0 --steps 30 --batch_size 4 --seed 42 --height 512 --width 512"
-
-gen22_27_train_command: "python train.py --config config.yaml --mode augmented"
-gen22_27_evaluate_command: "python evaluate.py --config config.yaml --checkpoint /content/gtsrb_repo/models/best_augmented.pt --tag gen22_27"
-
-analyze_class22_baseline_command: "python analyze_class_errors.py --csv-path /content/gtsrb_repo/results/predictions/predictions_baseline.csv --data-dir /content/gtsrb_repo/data/GTSRB/Final_Training/Images --class-idx 22 --output-dir /content/gtsrb_repo/results/reports/class22_baseline"
-analyze_class27_baseline_command: "python analyze_class_errors.py --csv-path /content/gtsrb_repo/results/predictions/predictions_baseline.csv --data-dir /content/gtsrb_repo/data/GTSRB/Final_Training/Images --class-idx 27 --output-dir /content/gtsrb_repo/results/reports/class27_baseline"
-
-analyze_class22_gen22_27_command: "python analyze_class_errors.py --csv-path /content/gtsrb_repo/results/predictions/predictions_gen22_27.csv --data-dir /content/gtsrb_repo/data/GTSRB/Final_Training/Images --class-idx 22 --output-dir /content/gtsrb_repo/results/reports/class22_gen22_27"
-analyze_class27_gen22_27_command: "python analyze_class_errors.py --csv-path /content/gtsrb_repo/results/predictions/predictions_gen22_27.csv --data-dir /content/gtsrb_repo/data/GTSRB/Final_Training/Images --class-idx 27 --output-dir /content/gtsrb_repo/results/reports/class27_gen22_27"
+gen22_class22_report_dir: /content/gtsrb_repo/results/reports/class22_gen22
 
 device: cuda

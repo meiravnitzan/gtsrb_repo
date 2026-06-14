@@ -4,7 +4,7 @@
     "class_id": 22,
     "class_name": "bumpy_road",
     "num_images": 80,
-    "source_dir": "/content/gtsrbrepo/data/GTSRB/Final_Training/Images/00022",
+    "source_dir": "/content/gtsrb_repo/data/GTSRB/Final_Training/Images/00022",
     "strength": 0.40,
     "prompts": [
       "a centered German bumpy road traffic sign, red triangle border, white background, uneven road bump icon, clean dataset style, front facing, high contrast",
@@ -17,7 +17,7 @@
     "class_id": 27,
     "class_name": "pedestrians",
     "num_images": 80,
-    "source_dir": "/content/gtsrbrepo/data/GTSRB/Final_Training/Images/00027",
+    "source_dir": "/content/gtsrb_repo/data/GTSRB/Final_Training/Images/00027",
     "strength": 0.35,
     "prompts": [
       "a centered German pedestrians traffic sign, red triangle border, white background, black pedestrian crossing symbol, clean dataset style, front facing, high contrast",

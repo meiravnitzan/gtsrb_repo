@@ -296,6 +296,49 @@ def show_misclassified_examples(
     plt.show()
     return examples
 
-print("Demo loaded.")
-print("Use render_demo('/path/to/image.ppm', true_label=22)")
-print("Or scan candidates with: scan_target_class_examples(limit=50)")
+def show_generated_images(class_id, from_idx, to_idx):
+    """
+    Show generated augmented images for one class in the inclusive index range [from_idx, to_idx].
+
+    Example:
+        show_generated_images(22, 0, 7)
+    """
+    generated_root = Path(cfg["generated_root"])
+    class_dir = generated_root / f"{class_id:05d}"
+
+    image_files = sorted(
+        [p for p in class_dir.iterdir() if p.suffix.lower() in [".png", ".jpg", ".jpeg", ".ppm"]]
+    )
+
+    selected = image_files[from_idx:to_idx + 1]
+    n = len(selected)
+
+    cols = min(4, n)
+    rows = (n + cols - 1) // cols
+
+    fig, axes = plt.subplots(rows, cols, figsize=(4 * cols, 4 * rows))
+    if rows == 1 and cols == 1:
+        axes = np.array([[axes]])
+    elif rows == 1:
+        axes = np.array([axes])
+    elif cols == 1:
+        axes = np.array([[ax] for ax in axes])
+
+    axes = axes.flatten()
+
+    for ax, img_path in zip(axes, selected):
+        img = Image.open(img_path).convert("RGB")
+        ax.imshow(img)
+        ax.axis("off")
+        ax.set_title(img_path.name, fontsize=10)
+
+    for ax in axes[n:]:
+        ax.axis("off")
+
+    fig.suptitle(
+        f"Generated images for class {class_id} ({CLASS_NAMES.get(class_id, 'unknown')})\n"
+        f"Showing indices {from_idx} to {to_idx}",
+        fontsize=14
+    )
+    plt.tight_layout()
+    plt.show()

@@ -154,7 +154,37 @@ def scan_target_class_examples(limit=30, class_id=None):
             "fixed_target": (b_pred != class_id and a_pred == class_id),
         })
     return rows
+def show_one_model(model, image_path, model_name="Model", true_label=None):
+    image, pred, conf, top3 = predict(model, image_path)
 
-print("Demo loaded.")
-print("Use render_demo('/path/to/image.ppm', true_label=22)")
-print("Or scan candidates with: scan_target_class_examples(limit=50)")
+    import matplotlib.pyplot as plt
+    from pathlib import Path
+
+    fig = plt.figure(figsize=(10, 4))
+    gs = fig.add_gridspec(1, 2, width_ratios=[1.1, 1])
+
+    ax0 = fig.add_subplot(gs[0, 0])
+    ax0.imshow(image)
+    ax0.axis("off")
+    title = f"Input image\n{Path(image_path).name}"
+    if true_label is not None:
+        title += f"\nTrue label: {true_label}"
+    ax0.set_title(title, fontsize=12)
+
+    ax1 = fig.add_subplot(gs[0, 1])
+    ax1.axis("off")
+    lines = [
+        model_name,
+        "",
+        f"Top-1: {pred}",
+        f"Confidence: {conf:.3f}",
+        "",
+        "Top-3:"
+    ]
+    for k, (cls, p) in enumerate(top3, start=1):
+        lines.append(f"{k}. {cls} ({p:.3f})")
+
+    ax1.text(0.02, 0.98, "\n".join(lines), va="top", ha="left", fontsize=12)
+    plt.tight_layout()
+    plt.show()
+

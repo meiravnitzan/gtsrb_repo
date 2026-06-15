@@ -233,4 +233,37 @@ def list_misclassified_images_for_class(
 
     return rows
     plt.show()
+def show_misclassified_examples(
+    class_id,
+    csv_path=cfg["baseline_predictions_csv"],
+    predicted_as=None,
+    max_show=5,
+):
+    examples = list_misclassified_images_for_class(
+        class_id=class_id,
+        csv_path=csv_path,
+        predicted_as=predicted_as,
+        limit=max_show,
+    )
+
+    if not examples:
+        print("No matching misclassified images found.")
+        return examples
+
+    fig, axes = plt.subplots(1, len(examples), figsize=(4 * len(examples), 4))
+    if len(examples) == 1:
+        axes = [axes]
+
+    for ax, ex in zip(axes, examples):
+        img = Image.open(ex["image_path"]).convert("RGB")
+        ax.imshow(img)
+        ax.axis("off")
+        ax.set_title(
+            f"true={ex['true_label']}\npred={ex['pred_label']}\nconf={ex['confidence']:.3f}",
+            fontsize=10
+        )
+
+    plt.tight_layout()
+    plt.show()
+    return examples
 

@@ -186,5 +186,51 @@ def show_one_model(model, image_path, model_name="Model", true_label=None):
 
     ax1.text(0.02, 0.98, "\n".join(lines), va="top", ha="left", fontsize=12)
     plt.tight_layout()
+
+import csv
+def list_misclassified_images_for_class(
+    class_id,
+    csv_path=cfg["baseline_predictions_csv"]
+    predicted_as=None,
+    limit=None,
+):
+    """
+    Return misclassified images for a specific true class from a predictions CSV.
+
+    Args:
+        class_id (int): true class to inspect, e.g. 22
+        csv_path (str): path to predictions CSV
+        predicted_as (int or None): optional filter for a specific wrong predicted label
+        limit (int or None): optional max number of rows to return
+
+    Returns:
+        list[dict]: each dict has image_path, true_label, pred_label, confidence
+    """
+    rows = []
+    with open(csv_path, "r", encoding="utf-8") as f:
+        reader = csv.DictReader(f)
+        for row in reader:
+            true_label = int(row["true_label"])
+            pred_label = int(row["pred_label"])
+            correct = int(row["correct"])
+
+            if true_label != class_id:
+                continue
+            if correct == 1:
+                continue
+            if predicted_as is not None and pred_label != predicted_as:
+                continue
+
+            rows.append({
+                "image_path": row["image_path"],
+                "true_label": true_label,
+                "pred_label": pred_label,
+                "confidence": float(row["confidence"]),
+            })
+
+            if limit is not None and len(rows) >= limit:
+                break
+
+    return rows
     plt.show()
 

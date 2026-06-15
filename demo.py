@@ -157,18 +157,26 @@ def scan_target_class_examples(limit=30, class_id=None):
 def show_one_model(model, image_path, model_name="Model", true_label=None):
     image, pred, conf, top3 = predict(model, image_path)
 
-    import matplotlib.pyplot as plt
     from pathlib import Path
+    import matplotlib.pyplot as plt
+    from PIL import Image
 
-    fig = plt.figure(figsize=(10, 4))
-    gs = fig.add_gridspec(1, 2, width_ratios=[1.1, 1])
+    pred_dir = REPO / "data" / "GTSRB" / "Final_Training" / "Images" / f"{pred:05d}"
+    pred_example = None
+    if pred_dir.exists():
+        pred_files = sorted([p for p in pred_dir.iterdir() if p.suffix.lower() in [".ppm", ".png", ".jpg", ".jpeg"]])
+        if pred_files:
+            pred_example = pred_files[0]
+
+    fig = plt.figure(figsize=(15, 4.5))
+    gs = fig.add_gridspec(1, 3, width_ratios=[1.1, 1, 1])
 
     ax0 = fig.add_subplot(gs[0, 0])
     ax0.imshow(image)
     ax0.axis("off")
     title = f"Input image\n{Path(image_path).name}"
     if true_label is not None:
-        title += f"\nTrue label: {true_label}"
+        title += f"\nTrue label: {true_label} ({CLASS_NAMES.get(true_label, 'unknown')})"
     ax0.set_title(title, fontsize=12)
 
     ax1 = fig.add_subplot(gs[0, 1])
@@ -176,18 +184,40 @@ def show_one_model(model, image_path, model_name="Model", true_label=None):
     lines = [
         model_name,
         "",
-        f"Top-1: {pred}",
+        f"Top-1: {pred} ({CLASS_NAMES.get(pred, 'unknown')})",
         f"Confidence: {conf:.3f}",
         "",
         "Top-3:"
     ]
     for k, (cls, p) in enumerate(top3, start=1):
-        lines.append(f"{k}. {cls} ({p:.3f})")
+        lines.append(f"{k}. {cls} - {CLASS_NAMES.get(cls, 'unknown')} ({p:.3f})")
 
-    ax1.text(0.02, 0.98, "\n".join(lines), va="top", ha="left", fontsize=12)
+    ax1.text(
+        0.02, 0.98,
+        "\n".join(lines),
+        va="top", ha="left", fontsize=12,
+        bbox=dict(boxstyle="round,pad=0.6", facecolor="#f3f4f6", edgecolor="#9ca3af")
+    )
+
+    ax2 = fig.add_subplot(gs[0, 2])
+    if pred_example is not None:
+        pred_img = Image.open(pred_example).convert("RGB")
+        ax2.imshow(pred_img)
+        ax2.axis("off")
+        ax2.set_title(
+            f"Predicted model example\nClass {pred} ({CLASS_NAMES.get(pred, 'unknown')})\n{pred_example.name}",
+            fontsize=11
+        )
+    else:
+        ax2.axis("off")
+        ax2.text(
+            0.5, 0.5,
+            f"Predicted model example\nNo example found for class {pred}",
+            ha="center", va="center", fontsize=12
+        )
+
     plt.tight_layout()
-
-import csv
+    plt.show()
 def list_misclassified_images_for_class(
     class_id,
     csv_path=cfg["baseline_predictions_csv"],

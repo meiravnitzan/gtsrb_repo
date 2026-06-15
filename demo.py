@@ -190,7 +190,7 @@ def show_one_model(model, image_path, model_name="Model", true_label=None):
 import csv
 def list_misclassified_images_for_class(
     class_id,
-    csv_path=cfg["baseline_predictions_csv"]
+    csv_path=cfg["baseline_predictions_csv"],
     predicted_as=None,
     limit=None,
 ):
